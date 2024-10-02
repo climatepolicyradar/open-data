@@ -1,0 +1,35 @@
+name: pre-commit-checks
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Install poetry
+        run: pipx install poetry==1.8.2
+
+      - name: Install python or load from cache with dependencies
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+          cache: "poetry"
+
+      - name: Install dependencies
+        run: |
+          poetry install --with dev
+
+      - name: Run pre-commit checks
+        run: |
+          poetry run pre-commit install
+          poetry run pre-commit run --all-files

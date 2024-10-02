@@ -1,0 +1,28 @@
+name: fixme-check
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Check code contains no FIXMEs
+        run: |
+            git grep -r --no-color ${case_sensitive} --line-number -e "FIXME" :^.github
+            if [[ $? -eq 0 ]]; then
+                # if we found any FIXME entries in checked in files, fail on main
+                exit 1
+            else
+                exit 0
+            fi
+        shell: bash {0}

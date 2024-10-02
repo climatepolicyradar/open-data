@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "open-data"
+version = "0.1.0"
+description = ""
+authors = ["CPR Tech <tech@climatepolicyradar.org>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+huggingface-hub = "^0.25.1"
+jupyterlab = "^4.2.5"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3.8.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -7,8 +7,11 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-huggingface-hub = "^0.25.1"
+huggingface-hub = {extras = ["cli"], version = "^0.25.1"}
 jupyterlab = "^4.2.5"
+datasets = "^3.0.1"
+duckdb = "^1.1.1"
+seaborn = "^0.13.2"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.8.0"

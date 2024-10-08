@@ -44,7 +44,7 @@ def get_geography_count_for_texts(texts: list[str]) -> pd.DataFrame:
 
     Returns dataframe with columns 'geography ISO', and 'count'.
     """
-
+    texts = [f"\\b{text.lower()}\\b" for text in texts]
     regex = f".*({'|'.join(texts)}).*"
     results_df = db.sql(
         f"""

@@ -203,17 +203,23 @@ if __name__ == "__main__":
     num_paragraphs_in_db = get_num_paragraphs_in_db()
     paragraph_count_by_geography = get_geography_count_for_texts([".*"])
 
+    st.title("Searchable World Map")
+    st.markdown(
+        "Search for keywords in the dataset and see where they appear on a world map."
+    )
+    with st.expander("You can use regex! Open for examples"):
+        st.markdown("""
+        - `natural(-|\s)resource`: match "natural-resource" and "natural resource"
+        - `fish(es)?`: match "fish" and "fishes"
+        - `elephants?`: match "elephant" and "elephants"
+        """)
+
     kwds = st.text_input(
         "Enter keywords separated by commas (spaces next to commas will be ignored)"
     )
 
     if kwds:
         kwds = [word.strip() for word in kwds.split(",")]
-
-        st.title("Searchable World Map")
-        st.markdown(
-            "Search for keywords in the dataset and see where they appear on a world map."
-        )
 
         st.markdown("## all keywords")
         fig, data1, data2 = plot_normalised_unnormalised_subplots(kwds)

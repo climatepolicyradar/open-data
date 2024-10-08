@@ -50,8 +50,8 @@ def get_geography_count_for_texts(texts: list[str]) -> pd.DataFrame:
         f"""
         SELECT "document_metadata.geographies", COUNT(*)
         FROM open_data 
-        WHERE "document_metadata.languages" = ['English']
-            AND ("text_block.text" SIMILAR TO '{regex}')
+        WHERE "text_block.language" = 'en'
+            AND (lower("text_block.text") SIMILAR TO '{regex}')
             AND "document_metadata.geographies" IS NOT NULL
             AND "document_metadata.geographies" <> ['XAA']
         GROUP BY "document_metadata.geographies"
@@ -172,19 +172,17 @@ def plot_country_map(
         f"Number of paragraphs containing words '{', '.join(keywords)}'. {num_geographies} total geographies."
     )
 
-    return fig, axis
-
 
 def plot_normalised_unnormalised_subplots(kwds):
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 9), dpi=300)
 
-    ax1 = plot_country_map(
+    plot_country_map(
         kwds,
         normalize_counts=False,
         axis=ax1,
     )
 
-    ax2 = plot_country_map(
+    plot_country_map(
         kwds,
         normalize_counts=True,
         axis=ax2,

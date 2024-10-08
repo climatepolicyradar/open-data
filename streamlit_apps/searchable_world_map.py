@@ -210,6 +210,11 @@ if __name__ == "__main__":
     if kwds:
         kwds = [word.strip() for word in kwds.split(",")]
 
+        st.title("Searchable World Map")
+        st.markdown(
+            "Search for keywords in the dataset and see where they appear on a world map."
+        )
+
         st.markdown("## all keywords")
         fig, data1, data2 = plot_normalised_unnormalised_subplots(kwds)
         n_paragraphs = data1["count"].sum()

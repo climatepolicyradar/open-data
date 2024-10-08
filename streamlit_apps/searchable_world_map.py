@@ -107,7 +107,7 @@ def plot_country_map(
     """
     Plot a map of the world with countries colored by the number of paragraphs containing any of the given keywords.
 
-    Returns a GeoDataFrame with columns 'ADMIN', 'geography ISO', 'count', 'geometry'.
+    Returns the raw results.
     """
     results_df = get_geography_count_for_texts(keywords)
 
@@ -172,23 +172,27 @@ def plot_country_map(
         f"Number of paragraphs containing words '{', '.join(keywords)}'. {num_geographies} total geographies."
     )
 
+    return results_df
 
-def plot_normalised_unnormalised_subplots(kwds):
+
+def plot_normalised_unnormalised_subplots(
+    kwds,
+) -> tuple[plt.Figure, pd.DataFrame, pd.DataFrame]:
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 9), dpi=300)
 
-    plot_country_map(
+    df_unnorm = plot_country_map(
         kwds,
         normalize_counts=False,
         axis=ax1,
     )
 
-    plot_country_map(
+    df_norm = plot_country_map(
         kwds,
         normalize_counts=True,
         axis=ax2,
     )
 
-    return fig, (ax1, ax2)
+    return fig, df_unnorm, df_norm
 
 
 if __name__ == "__main__":
@@ -206,12 +210,18 @@ if __name__ == "__main__":
     if kwds:
         kwds = [word.strip() for word in kwds.split(",")]
 
-        st.markdown("## All keywords")
-        fig, axs = plot_normalised_unnormalised_subplots(kwds)
+        st.markdown("## all keywords")
+        fig, data1, data2 = plot_normalised_unnormalised_subplots(kwds)
+        n_paragraphs = data1["count"].sum()
+        percentage = round(n_paragraphs / num_paragraphs_in_db * 100, 2)
+        st.markdown(f"Num paragraphs: {n_paragraphs:,} ({percentage}%)")
         st.write(fig)
 
         if len(kwds) > 1:
             for keyword in kwds:
                 st.markdown(f"## {keyword}")
-                fig, _ = plot_normalised_unnormalised_subplots([keyword])
+                fig, data1, data2 = plot_normalised_unnormalised_subplots([keyword])
+                n_paragraphs = data1["count"].sum()
+                percentage = round(n_paragraphs / num_paragraphs_in_db * 100, 2)
+                st.markdown(f"Num paragraphs: {n_paragraphs:,} ({percentage}%)")
                 st.write(fig)

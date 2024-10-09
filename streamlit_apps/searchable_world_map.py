@@ -67,7 +67,6 @@ def get_geography_count_for_texts(texts: list[str]) -> pd.DataFrame:
         columns={
             "document_metadata.geographies": "geography ISO",
             "count_star()": "count",
-            # 'any_value("document_metadata.family_import_id")': "family ID"
         }
     )
 
@@ -123,8 +122,6 @@ def plot_country_map(
     min_count, max_count = results_df["count"].min(), results_df["count"].max()
     num_geographies = results_df["geography ISO"].nunique()
 
-    # TODO: is 'ADMO_ISO' the right column to join on? The one that Anne initially
-    # specified, 'ADMO_A3', doesn't exist in this dataset.
     world_with_counts = world.merge(
         results_df, left_on="ADM0_A3", right_on="geography ISO", how="left"
     )
@@ -143,7 +140,7 @@ def plot_country_map(
         vmax=max_count,
         cmap="viridis_r",
         edgecolor="face",
-        linewidth=0.3,  # But hack-y but helps small states stand out
+        linewidth=0.3,  # helps small states stand out
         missing_kwds={"color": "darkgrey", "edgecolor": "white", "hatch": "///"},
     )
 
@@ -162,10 +159,6 @@ def plot_country_map(
     axis.set_xticks([])
     axis.set_yticks([])
 
-    # #Set markers to square shape
-    # leg1 = ax.get_legend()
-    # for ea in leg1.legend_handles:
-    #     ea.set_marker('s')
     fig.tight_layout()
 
     axis.set_title(

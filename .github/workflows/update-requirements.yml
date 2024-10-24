@@ -25,11 +25,10 @@ jobs:
         run: |
           poetry export -f requirements.txt --output requirements.txt --without-hashes
           
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v5
-        with:
-          commit-message: Update requirements.txt
-          title: Update requirements.txt from Poetry dependencies
-          body: Automated update of requirements.txt from Poetry configuration
-          branch: update-requirements
-          delete-branch: true
+      - name: Commit changes
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+          git add requirements.txt
+          git commit -m "Update requirements.txt" || echo "No changes to commit"
+          git push

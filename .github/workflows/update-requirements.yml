@@ -1,0 +1,36 @@
+name: Update Requirements.txt
+
+on:
+  push:
+    paths:
+      - 'pyproject.toml'
+      - 'poetry.lock'
+  workflow_dispatch:
+
+jobs:
+  update-requirements:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          
+      - name: Export requirements.txt
+        run: |
+          poetry export -f requirements.txt --output requirements.txt --without-hashes
+          
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: Update requirements.txt
+          title: Update requirements.txt from Poetry dependencies
+          body: Automated update of requirements.txt from Poetry configuration
+          branch: update-requirements
+          delete-branch: true

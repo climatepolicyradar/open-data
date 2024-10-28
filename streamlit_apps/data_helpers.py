@@ -1,13 +1,11 @@
 from typing import Optional
 from huggingface_hub import snapshot_download
 
-REPO_NAME = "ClimatePolicyRadar/all-document-text-data-weekly"
+REPO_NAME = "ClimatePolicyRadar/all-document-text-data"
 REPO_URL = f"https://huggingface.co/datasets/{REPO_NAME}"
 CACHE_DIR = "../cache"
 
-# INTERNAL NOTE: use this commit hash until the weekly pipeline run that produces the data
-# is stable.
-REVISION = "bd0abf24ae34d3150bdd8ac66f36a28e47f3ee93"  # Use this to set a commit hash. Recommended!
+REVISION = "main"  # Use this to set a commit hash. Recommended!
 
 
 def download_data(cache_dir: str, revision: Optional[str] = None) -> None:

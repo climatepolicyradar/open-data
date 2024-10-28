@@ -16,8 +16,6 @@ CACHE_DIR = Path(__file__).parent / "../cache"
 
 @st.cache_resource
 def load_data():
-    # INTERNAL NOTE: use this commit hash until the weekly pipeline run that produces the
-    # data is stable.
     download_data(
         cache_dir=str(CACHE_DIR),
         revision="bd0abf24ae34d3150bdd8ac66f36a28e47f3ee93",

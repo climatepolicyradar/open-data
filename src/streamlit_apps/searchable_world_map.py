@@ -9,16 +9,15 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import streamlit as st
 
 
-from data_helpers import download_data
-
-CACHE_DIR = Path(__file__).parent / "../cache"
+from src.data_helpers import download_data
+from src.config import CACHE_DIR, REVISION
 
 
 @st.cache_resource
 def load_data():
     download_data(
         cache_dir=str(CACHE_DIR),
-        revision="bd0abf24ae34d3150bdd8ac66f36a28e47f3ee93",
+        revision=REVISION,
     )
 
     db = duckdb.connect()
@@ -84,8 +83,7 @@ def load_world_geometries():
     Drop Antarctica and Seven seas (open ocean) geometries to make the map look nicer.
     """
     world = gpd.read_file(
-        Path(__file__).parent
-        / "./ne_50m_admin_0_countries/ne_50m_admin_0_countries.shp"
+        Path(__file__).parent / "../data/earth_vectors/ne_50m_admin_0_countries.shp"
     )
     world = world.to_crs(
         "+proj=eck4 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs"
@@ -145,8 +143,9 @@ def plot_country_map(
     divider = make_axes_locatable(axis)
     cax = divider.append_axes("bottom", size="5%", pad=0.05)
     fig.colorbar(
-        mpl.cm.ScalarMappable(
-            norm=mpl.colors.Normalize(vmin=min_count, vmax=max_count), cmap="viridis_r"
+        mpl.cm.ScalarMappable(  # type: ignore
+            norm=mpl.colors.Normalize(vmin=min_count, vmax=max_count),  # type: ignore
+            cmap="viridis_r",
         ),
         cax=cax,
         orientation="horizontal",
@@ -168,7 +167,7 @@ def plot_country_map(
 
 def plot_normalised_unnormalised_subplots(
     kwds,
-) -> tuple[plt.Figure, pd.DataFrame, pd.DataFrame]:
+) -> tuple[plt.Figure, pd.DataFrame, pd.DataFrame]:  # type: ignore
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 9), dpi=300)
 
     df_unnorm = plot_country_map(
@@ -199,7 +198,7 @@ if __name__ == "__main__":
         "Search for keywords in the dataset and see where they appear on a world map."
     )
     with st.expander("You can use regex! Open for examples"):
-        st.markdown("""
+        st.markdown(r"""
         - `natural(-|\s)resource`: match "natural-resource" and "natural resource"
         - `fish(es)?`: match "fish" and "fishes"
         - `elephants?`: match "elephant" and "elephants"

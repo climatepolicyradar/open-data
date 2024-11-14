@@ -52,7 +52,6 @@ def get_geography_count_for_texts(texts: list[str]) -> pd.DataFrame:
             AND (lower("text_block.text") SIMILAR TO '{regex}')
             AND "document_metadata.geographies" IS NOT NULL
             AND "document_metadata.geographies" <> ['XAA']
-            AND ("text_block.type" = 'title' OR  "text_block.type" = 'Text' OR "text_block.type" =  'sectionHeading')
         GROUP BY "document_metadata.geographies"
         ORDER BY COUNT(*) DESC
         """

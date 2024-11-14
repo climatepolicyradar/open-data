@@ -18,7 +18,7 @@ CACHE_DIR = Path(__file__).parent / "../cache"
 def load_data():
     download_data(
         cache_dir=str(CACHE_DIR),
-        revision="main",
+        revision="bd0abf24ae34d3150bdd8ac66f36a28e47f3ee93",
     )
 
     db = duckdb.connect()

@@ -159,11 +159,11 @@ def plot_country_map(
 
     fig.tight_layout()
 
-    #Add a title with key stats; if it's too long, truncate the keywords
-    keywords_joined = ', '.join(keywords)
+    # Add a title with key stats; if it's too long, truncate the keywords
+    keywords_joined = ", ".join(keywords)
     if len(keywords_joined) > 15:
         keywords_joined = f"{keywords_joined[0:15]}..."
-        
+
     axis.set_title(
         f"Number of paragraphs containing: '{keywords_joined}'. From {num_geographies} geographies."
     )

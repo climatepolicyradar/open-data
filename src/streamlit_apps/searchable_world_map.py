@@ -10,14 +10,14 @@ import streamlit as st
 
 
 from src.data_helpers import download_data
-from src.config import CACHE_DIR, REVISION
+from src.config import CACHE_DIR, DATA_REVISION
 
 
 @st.cache_resource
 def load_data():
     download_data(
         cache_dir=str(CACHE_DIR),
-        revision=REVISION,
+        revision=DATA_REVISION,
     )
 
     db = duckdb.connect()

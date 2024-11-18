@@ -51,6 +51,7 @@ def get_geography_count_for_texts(texts: list[str]) -> pd.DataFrame:
             AND (lower("text_block.text") SIMILAR TO '{regex}')
             AND "document_metadata.geographies" IS NOT NULL
             AND "document_metadata.geographies" <> ['XAA']
+            AND ("text_block.type" = 'title' OR  "text_block.type" = 'Text' OR "text_block.type" =  'sectionHeading')
         GROUP BY "document_metadata.geographies"
         ORDER BY COUNT(*) DESC
         """
@@ -158,8 +159,13 @@ def plot_country_map(
 
     fig.tight_layout()
 
+    # Add a title with key stats; if it's too long, truncate the keywords
+    keywords_joined = ", ".join(keywords)
+    if len(keywords_joined) > 15:
+        keywords_joined = f"{keywords_joined[0:15]}..."
+
     axis.set_title(
-        f"Number of paragraphs containing words '{', '.join(keywords)}'. {num_geographies} total geographies."
+        f"Number of paragraphs containing: '{keywords_joined}'. From {num_geographies} geographies."
     )
 
     return results_df

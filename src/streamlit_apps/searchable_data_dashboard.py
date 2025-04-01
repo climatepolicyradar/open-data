@@ -28,24 +28,28 @@ def load_data():
     # You'll need to log in using `huggingface-cli login` in your terminal first
     db.execute("CREATE SECRET hf_token (TYPE HUGGINGFACE, PROVIDER credential_chain);")
 
-    # Create a persistent table with only the columns we need
-    db.execute("""
-        CREATE TABLE IF NOT EXISTS open_data AS 
-        SELECT 
-            "document_metadata.geographies",
-            "document_metadata.corpus_type_name",
-            "document_metadata.publication_ts",
-            "text_block.text",
-            "text_block.language",
-            "text_block.type"
-        FROM read_parquet('{}/*.parquet')
-    """.format(CACHE_DIR))
+    # Check if table exists
+    table_exists = db.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'open_data'").fetchone()[0] > 0
 
-    # Create indexes for common query patterns
-    db.execute("CREATE INDEX IF NOT EXISTS idx_language ON open_data(\"text_block.language\")")
-    db.execute("CREATE INDEX IF NOT EXISTS idx_corpus_type ON open_data(\"document_metadata.corpus_type_name\")")
-    db.execute("CREATE INDEX IF NOT EXISTS idx_publication_ts ON open_data(\"document_metadata.publication_ts\")")
-    db.execute("CREATE INDEX IF NOT EXISTS idx_text_type ON open_data(\"text_block.type\")")
+    if not table_exists:
+        # Create a persistent table with only the columns we need
+        db.execute("""
+            CREATE TABLE open_data AS 
+            SELECT 
+                "document_metadata.geographies",
+                "document_metadata.corpus_type_name",
+                "document_metadata.publication_ts",
+                "text_block.text",
+                "text_block.language",
+                "text_block.type"
+            FROM read_parquet('{}/*.parquet')
+        """.format(CACHE_DIR))
+
+        # Create indexes for common query patterns
+        db.execute("CREATE INDEX idx_language ON open_data(\"text_block.language\")")
+        db.execute("CREATE INDEX idx_corpus_type ON open_data(\"document_metadata.corpus_type_name\")")
+        db.execute("CREATE INDEX idx_publication_ts ON open_data(\"document_metadata.publication_ts\")")
+        db.execute("CREATE INDEX idx_text_type ON open_data(\"text_block.type\")")
 
     return db
 
@@ -58,9 +62,8 @@ def get_geography_count_for_texts(
 
     Returns dataframe with columns 'geography ISO', and 'count'.
     """
-    # Build the text search condition using LIKE for exact matches
-    text_conditions = [f"lower(\"text_block.text\") LIKE '%{text.lower()}%'" for text in texts]
-    text_condition = " OR ".join(text_conditions)
+    texts = [f"\\b{text.lower()}\\b" for text in texts]
+    regex = f".*({'|'.join(texts)}).*"
 
     if corpus_type_names is None:
         corpus_type_names_clause = ""
@@ -78,7 +81,7 @@ def get_geography_count_for_texts(
         SELECT "document_metadata.geographies", COUNT(*)
         FROM open_data 
         WHERE "text_block.language" = 'en'
-            AND ({text_condition})
+            AND (lower("text_block.text") SIMILAR TO '{regex}')
             AND "document_metadata.geographies" IS NOT NULL
             AND "document_metadata.geographies" <> ['XAA']
             AND ("text_block.type" = 'title' OR  "text_block.type" = 'Text' OR "text_block.type" =  'sectionHeading')
@@ -112,9 +115,8 @@ def get_corpus_type_count_for_texts(
 
     Returns dataframe with columns 'corpus_type_name' and 'count'.
     """
-    # Build the text search condition using LIKE for exact matches
-    text_conditions = [f"lower(\"text_block.text\") LIKE '%{text.lower()}%'" for text in texts]
-    text_condition = " OR ".join(text_conditions)
+    texts = [f"\\b{text.lower()}\\b" for text in texts]
+    regex = f".*({'|'.join(texts)}).*"
 
     if corpus_type_names is None:
         corpus_type_names_clause = ""
@@ -132,7 +134,7 @@ def get_corpus_type_count_for_texts(
         SELECT "document_metadata.corpus_type_name", COUNT(*)
         FROM open_data 
         WHERE "text_block.language" = 'en'
-            AND ({text_condition})
+            AND (lower("text_block.text") SIMILAR TO '{regex}')
             AND "document_metadata.corpus_type_name" IS NOT NULL
             AND ("text_block.type" = 'title' OR  "text_block.type" = 'Text' OR "text_block.type" =  'sectionHeading')
             {corpus_type_names_clause}
@@ -161,9 +163,8 @@ def get_time_series_for_texts(
 
     Returns dataframe with columns 'year', 'corpus_type_name', and 'count'.
     """
-    # Build the text search condition using LIKE for exact matches
-    text_conditions = [f"lower(\"text_block.text\") LIKE '%{text.lower()}%'" for text in texts]
-    text_condition = " OR ".join(text_conditions)
+    texts = [f"\\b{text.lower()}\\b" for text in texts]
+    regex = f".*({'|'.join(texts)}).*"
 
     if corpus_type_names is None:
         corpus_type_names_clause = ""
@@ -184,7 +185,7 @@ def get_time_series_for_texts(
             COUNT(*) as count
         FROM open_data 
         WHERE "text_block.language" = 'en'
-            AND ({text_condition})
+            AND (lower("text_block.text") SIMILAR TO '{regex}')
             AND "document_metadata.publication_ts" IS NOT NULL
             AND "document_metadata.corpus_type_name" IS NOT NULL
             AND ("text_block.type" = 'title' OR  "text_block.type" = 'Text' OR "text_block.type" =  'sectionHeading')
@@ -498,13 +499,13 @@ if __name__ == "__main__":
             st.write(fig)
 
         if show_time_series:
-            st.markdown("## Time Series")
+            st.markdown("## Time Series (absolute)")
             fig, ax = plt.subplots(figsize=(12, 6))
             plot_time_series(kwds, selected_corpus_types, selected_year_range, ax)
             st.write(fig)
 
         if show_time_relative:
-            st.markdown("## Time Series")
+            st.markdown("## Time Series (relative)")
             fig, ax = plt.subplots(figsize=(12, 6))
             plot_time_series(kwds, selected_corpus_types, selected_year_range, ax, relative = True)
             st.write(fig)
@@ -532,7 +533,6 @@ if __name__ == "__main__":
                     st.write(fig)
                 
                 if show_time_relative:
-                    st.markdown("## Time Series")
                     fig, ax = plt.subplots(figsize=(12, 6))
                     plot_time_series([keyword], selected_corpus_types, selected_year_range, ax, relative = True)
                     st.write(fig)
